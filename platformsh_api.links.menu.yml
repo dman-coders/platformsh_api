@@ -1,0 +1,10 @@
+platformsh_api.settings:
+  title: 'Platformsh API'
+  description: 'Configure the settings for platformsh api.'
+  route_name: platformsh_api.settings
+  parent: system.admin_config_services
+platformsh_api.testaccess:
+  title: 'Test Platformsh API'
+  description: 'Check connection for Platformsh api.'
+  route_name: platformsh_api.testaccess
+  parent: platformsh_api.settings

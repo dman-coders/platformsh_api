@@ -1,0 +1,15 @@
+{
+    "name": "dman-coders/platformsh_api",
+    "description": "Interact with Platform.sh PAAS Services",
+    "type": "drupal-module",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Dan Morrison"
+        }
+    ],
+    "require": {
+        "platformsh/client": "^2.5"
+    }
+}

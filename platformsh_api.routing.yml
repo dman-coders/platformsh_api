@@ -1,0 +1,15 @@
+platformsh_api.settings:
+  path: /admin/config/services/platformsh_api
+  defaults:
+    _title: 'Administer platformsh api'
+    _form: \Drupal\platformsh_api\Form\AdminSettingsForm
+  requirements:
+    _permission: 'administer platformsh_api'
+
+platformsh_api.testaccess:
+  path: /admin/config/services/platformsh_api/testaccess
+  defaults:
+    _title: 'Check Platformsh API access'
+    _form: \Drupal\platformsh_api\Form\TestAccessForm
+  requirements:
+    _permission: 'administer platformsh_api'
