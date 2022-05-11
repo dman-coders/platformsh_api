@@ -2,9 +2,9 @@
 
 namespace Drupal\platformsh_api\Form;
 
-use Drupal;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\PlatformClient;
 
@@ -13,10 +13,7 @@ use Platformsh\Client\PlatformClient;
  */
 class TestAccessForm extends FormBase {
 
-  /**
-   * @var \Platformsh\Client\PlatformClient
-   */
-  private $api_client;
+  private PlatformClient $api_client;
 
   /**
    * Initializing api_client in the constructor didn't seem to persist.
@@ -76,7 +73,7 @@ class TestAccessForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    # Submission actually gets processed in the buildform phase.
+    # Submission actually gets processed in the buildForm phase.
     $form_state->setRebuild(TRUE);
   }
 
@@ -91,9 +88,14 @@ class TestAccessForm extends FormBase {
   public function submitGetAccountInfo(array &$form, FormStateInterface $form_state) {
     $this->messenger()
       ->addStatus($this->t('Running API request getAccountInfo.'));
-    $response = $this->getApiClient()->getAccountInfo();
-    $this->messenger()->addStatus($this->t('Ran API request.'));
-    $response = $this->formatResponse($response);
+    try {
+      $response = $this->getApiClient()->getAccountInfo();
+      $this->messenger()->addStatus($this->t('Ran API request.'));
+      $response = $this->formatResponse($response);
+    } catch (GuzzleException $e) {
+      $this->messenger()->addStatus($this->t('Failed API request.'));
+      $response = ['#markup' => $e->getMessage()];
+    }
     $form_state->setValue('response', $response);
     $form_state->setRebuild(TRUE);
   }
@@ -124,7 +126,7 @@ class TestAccessForm extends FormBase {
 
 
   /**
-   * Format the JSON into something renderable
+   * Format the JSON into something render-able
    */
   public function formatResponse($response): array {
     $markup = '<div id="my-custom-markup"><h1>Here is my markup</h1><pre>' . print_r($response, TRUE) . '</pre></div>';
@@ -135,7 +137,7 @@ class TestAccessForm extends FormBase {
   }
 
   /**
-   * Format the JSON into something renderable.
+   * Format the JSON into something render-able.
    *
    * @return array a render array
    */
@@ -163,7 +165,7 @@ class TestAccessForm extends FormBase {
   }
 
   /**
-   * Format the JSON into something renderable
+   * Format the JSON into something render-able
    *
    * @param $project Project
    *
