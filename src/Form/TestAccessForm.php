@@ -9,14 +9,19 @@ use Platformsh\Client\Model\Project;
 use Platformsh\Client\PlatformClient;
 
 /**
- * TODO: class docs.
+ * Admin form for testing the API credentials and access
+ *
+ * Published at /admin/config/services/platformsh_api/testaccess
  */
 class TestAccessForm extends FormBase {
 
   private PlatformClient $api_client;
 
   /**
-   * Initializing api_client in the constructor didn't seem to persist.
+   * Return a working API client.
+   *
+   * Initializing api_client in the constructor didn't seem to persist,
+   * so use a getter.
    *
    * @return \Platformsh\Client\PlatformClient
    */
@@ -91,7 +96,8 @@ class TestAccessForm extends FormBase {
     try {
       $response = $this->getApiClient()->getAccountInfo();
       $this->messenger()->addStatus($this->t('Ran API request.'));
-      $response = $this->formatResponse($response);
+      #$response = $this->formatResponse($response);
+      $response = $this->formatTable($response);
     } catch (GuzzleException $e) {
       $this->messenger()->addStatus($this->t('Failed API request.'));
       $response = ['#markup' => $e->getMessage()];
@@ -139,29 +145,71 @@ class TestAccessForm extends FormBase {
   /**
    * Format the JSON into something render-able.
    *
+   * @param array $data a nested data structure
+   * @param array $keys The data keys to display, show all if undefined.
+   *
+   *
    * @return array a render array
    */
-  public function formatTable($response, $keys = ['id', 'title']): array {
+  public function formatTable($data, $keys = []): array {
     $output_array = [
       '#type' => 'table',
       '#rows' => [],
     ];
-    foreach ($response as $response_row) {
-      $key = $response_row->$keys[0];
-      $rows = [];
-      foreach ($keys as $key_id) {
-        if (!is_array($response_row[$key_id])) {
-          $rows[$key_id] = ['data' => $response_row[$key_id]];
+
+    $rows = [];
+    if (!empty($keys)) {
+      foreach ($keys as $row_key) {
+        if (empty($data[$row_key])) {
+          continue;
         }
-        else {
-          $rows[$key_id] = ['data' => 'Array'];
-        }
+        $rows[$row_key] = $this->formatKeyValRow($row_key, $data[$row_key]);
       }
-      $output_array['#rows'][$key] = [
-        'data' => $rows,
+    }
+    else {
+      foreach ($data as $row_key => $row_val) {
+        $rows[$row_key] = $this->formatKeyValRow($row_key, $row_val);
+      }
+    }
+    $output_array['#rows'] = $rows;
+    return $output_array;
+  }
+
+  /**
+   * Unpack a nested data struct and re-pack it into nested table cells.
+   *
+   * @param $row_key
+   * @param $row_val
+   *
+   * @return array
+   */
+  function formatKeyValRow($row_key, $row_val) {
+    $row = [
+      'key' => [
+        'data' => $row_key,
+        'style' => 'vertical-align:top; font-weight:bold;'
+      ],
+    ];
+    if (!is_array($row_val)) {
+      $row['value'] = $row_val;
+    }
+    else {
+      #$row['value']['data'] = $this->formatTable($row_val);
+      // Wrap the nested table content into a collapsible.
+      $title = empty($row_val['title']) ? count($row_val) . ' ' . $row_key : $row_val['title'];
+      $row['value']['data'] = [
+        '#type' => 'details',
+        '#title' => $title,
+        '#description' => $this->formatTable($row_val)
       ];
     }
-    return $output_array;
+    // If labelling is working well enough,
+    // don't need to render the counter column at all.
+    if (is_numeric($row_key)) {
+      #unset($row['key']['data']);
+      unset($row['key']);
+    }
+    return $row;
   }
 
   /**
