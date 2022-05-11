@@ -13,6 +13,9 @@ use Platformsh\Client\PlatformClient;
  */
 class TestAccessForm extends FormBase {
 
+  /**
+   * @var \Platformsh\Client\PlatformClient
+   */
   private $api_client;
 
   /**
@@ -20,12 +23,11 @@ class TestAccessForm extends FormBase {
    *
    * @return \Platformsh\Client\PlatformClient
    */
-  private function getApiClient() {
+  private function getApiClient(): PlatformClient {
     if (!empty($this->api_client)) {
       return $this->api_client;
     }
-    $config = $this->config('platformsh_api.settings');
-    $api_key = Drupal::config('platformsh_api.settings')->get('api_key');
+    $api_key = $this->config('platformsh_api.settings')->get('api_key');
     /** @var \Platformsh\Client\Model\Project $api_project */
     $this->api_client = new PlatformClient();
     $this->api_client->getConnector()->setApiToken($api_key, 'exchange');
@@ -35,14 +37,14 @@ class TestAccessForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'platformsh_api_testaccess_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
 
     $form['actions']['getAccountInfo'] = [
       '#type' => 'submit',
@@ -91,7 +93,7 @@ class TestAccessForm extends FormBase {
       ->addStatus($this->t('Running API request getAccountInfo.'));
     $response = $this->getApiClient()->getAccountInfo();
     $this->messenger()->addStatus($this->t('Ran API request.'));
-    $response = $this->formatResponse($response, $keys = ['id', 'title']);
+    $response = $this->formatResponse($response);
     $form_state->setValue('response', $response);
     $form_state->setRebuild(TRUE);
   }
@@ -111,21 +113,20 @@ class TestAccessForm extends FormBase {
         ->addStatus($this->t('Running API request getProjectInfo.'));
       $response = $this->getApiClient()->getProject($projectID);
       $this->messenger()->addStatus($this->t('Ran API request.'));
-      $response = $this->formatProjectInfo($response, $keys = ['id', 'title']);
+      $response = $this->formatProjectInfo($response);
       $form_state->setValue('response', $response);
-      $form_state->setRebuild(TRUE);
     }
     else {
       $form_state->setValue('response', ['#markup' => 'No ID provided']);
-      $form_state->setRebuild(TRUE);
     }
+    $form_state->setRebuild(TRUE);
   }
 
 
   /**
    * Format the JSON into something renderable
    */
-  public function formatResponse($response) {
+  public function formatResponse($response): array {
     $markup = '<div id="my-custom-markup"><h1>Here is my markup</h1><pre>' . print_r($response, TRUE) . '</pre></div>';
     return [
       '#type' => 'markup',
@@ -136,9 +137,9 @@ class TestAccessForm extends FormBase {
   /**
    * Format the JSON into something renderable.
    *
-   * @return a render array
+   * @return array a render array
    */
-  public function formatTable($response, $keys = ['id', 'title']) {
+  public function formatTable($response, $keys = ['id', 'title']): array {
     $output_array = [
       '#type' => 'table',
       '#rows' => [],
@@ -165,11 +166,13 @@ class TestAccessForm extends FormBase {
    * Format the JSON into something renderable
    *
    * @param $project Project
+   *
+   * @return array
    */
-  public function formatProjectInfo($project) {
+  public function formatProjectInfo(Project $project): array {
     $render = [];
-    $render['title']['#markup'] = ['<h1>' . $project->title . '</h1>'];
-    $render['id']['#markup'] = ['<h2>' . $project->id . '</h2>'];
+    $render['title']['#markup'] = ['<h1>' . $project->getProperty('title') . '</h1>'];
+    $render['id']['#markup'] = ['<h2>' . $project->getProperty('id') . '</h2>'];
     return $render;
   }
 
