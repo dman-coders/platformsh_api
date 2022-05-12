@@ -153,12 +153,7 @@ class TestAccessForm extends FormBase {
    *
    * @return array a render array
    */
-  public function dataStructToRenderableTable($data, $keys = []): array {
-    $output_array = [
-      '#type' => 'table',
-      '#rows' => [],
-    ];
-
+  public function dataStructToRenderableTable(array $data, array $keys = []): array {
     $rows = [];
     if (!empty($keys)) {
       foreach ($keys as $row_key) {
@@ -173,8 +168,10 @@ class TestAccessForm extends FormBase {
         $rows[$row_key] = $this->keyValRowToRenderable($row_key, $row_val);
       }
     }
-    $output_array['#rows'] = $rows;
-    return $output_array;
+    return [
+      '#type' => 'table',
+      '#rows' => $rows,
+    ];
   }
 
   /**
@@ -185,7 +182,7 @@ class TestAccessForm extends FormBase {
    *
    * @return array
    */
-  function keyValRowToRenderable($row_key, $row_val) {
+  function keyValRowToRenderable($row_key, $row_val): array {
     $row = [
       'key' => [
         'data' => $row_key,
