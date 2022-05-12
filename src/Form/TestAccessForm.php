@@ -4,6 +4,8 @@ namespace Drupal\platformsh_api\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use GuzzleHttp\Exception\GuzzleException;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\PlatformClient;
@@ -97,7 +99,7 @@ class TestAccessForm extends FormBase {
       $response = $this->getApiClient()->getAccountInfo();
       $this->messenger()->addStatus($this->t('Ran API request.'));
       #$response = $this->formatResponse($response);
-      $response = $this->formatTable($response);
+      $response = $this->dataStructToRenderableTable($response);
     } catch (GuzzleException $e) {
       $this->messenger()->addStatus($this->t('Failed API request.'));
       $response = ['#markup' => $e->getMessage()];
@@ -121,7 +123,7 @@ class TestAccessForm extends FormBase {
         ->addStatus($this->t('Running API request getProjectInfo.'));
       $response = $this->getApiClient()->getProject($projectID);
       $this->messenger()->addStatus($this->t('Ran API request.'));
-      $response = $this->formatProjectInfo($response);
+      $response = $this->projectInfoToRenderable($response);
       $form_state->setValue('response', $response);
     }
     else {
@@ -134,7 +136,7 @@ class TestAccessForm extends FormBase {
   /**
    * Format the JSON into something render-able
    */
-  public function formatResponse($response): array {
+  public function rawDataToRenderable($response): array {
     $markup = '<div id="my-custom-markup"><h1>Here is my markup</h1><pre>' . print_r($response, TRUE) . '</pre></div>';
     return [
       '#type' => 'markup',
@@ -151,7 +153,7 @@ class TestAccessForm extends FormBase {
    *
    * @return array a render array
    */
-  public function formatTable($data, $keys = []): array {
+  public function dataStructToRenderableTable($data, $keys = []): array {
     $output_array = [
       '#type' => 'table',
       '#rows' => [],
@@ -163,12 +165,12 @@ class TestAccessForm extends FormBase {
         if (empty($data[$row_key])) {
           continue;
         }
-        $rows[$row_key] = $this->formatKeyValRow($row_key, $data[$row_key]);
+        $rows[$row_key] = $this->keyValRowToRenderable($row_key, $data[$row_key]);
       }
     }
     else {
       foreach ($data as $row_key => $row_val) {
-        $rows[$row_key] = $this->formatKeyValRow($row_key, $row_val);
+        $rows[$row_key] = $this->keyValRowToRenderable($row_key, $row_val);
       }
     }
     $output_array['#rows'] = $rows;
@@ -183,7 +185,7 @@ class TestAccessForm extends FormBase {
    *
    * @return array
    */
-  function formatKeyValRow($row_key, $row_val) {
+  function keyValRowToRenderable($row_key, $row_val) {
     $row = [
       'key' => [
         'data' => $row_key,
@@ -200,7 +202,7 @@ class TestAccessForm extends FormBase {
       $row['value']['data'] = [
         '#type' => 'details',
         '#title' => $title,
-        '#description' => $this->formatTable($row_val)
+        '#description' => $this->dataStructToRenderableTable($row_val)
       ];
     }
     // If labelling is working well enough,
@@ -219,10 +221,17 @@ class TestAccessForm extends FormBase {
    *
    * @return array
    */
-  public function formatProjectInfo(Project $project): array {
+  public function projectInfoToRenderable(Project $project): array {
     $render = [];
-    $render['title']['#markup'] = ['<h1>' . $project->getProperty('title') . '</h1>'];
-    $render['id']['#markup'] = ['<h2>' . $project->getProperty('id') . '</h2>'];
+    $render['title']['#markup'] = '<h1>' . $project->getProperty('title') . '</h1>';
+    $url =  Url::fromUri($project->getProperty('uri'));
+    $link = Link::fromTextAndUrl($project->getProperty('id'), $url);
+    $render['id'] = $link->toRenderable();
+    $properties = [
+      'region' => $project->getProperty('region'),
+      'plan' => $project->getProperty('plan')
+    ];
+    $render['properties'] = $this->dataStructToRenderableTable($properties);
     return $render;
   }
 
