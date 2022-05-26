@@ -221,14 +221,30 @@ class TestAccessForm extends FormBase {
   public function projectInfoToRenderable(Project $project): array {
     $render = [];
     $render['title']['#markup'] = '<h1>' . $project->getProperty('title') . '</h1>';
-    $url =  Url::fromUri($project->getProperty('uri'));
+
+    $url =  Url::fromUri($project->getLink('#ui'));
     $link = Link::fromTextAndUrl($project->getProperty('id'), $url);
-    $render['id'] = $link->toRenderable();
+    $render['id'] = [
+      '#type' => 'container',
+      'link' => $link->toRenderable()
+    ];
+
+    $subscription = $project->getProperty('subscription');
+    $subscription_link = Link::fromTextAndUrl('license', Url::fromUri($subscription['license_uri']));
+    $render['subscription'] = [
+      '#type' => 'container',
+      'link' => $subscription_link->toRenderable()
+    ];
+
     $properties = [
+      'plan' => $subscription['plan'],
       'region' => $project->getProperty('region'),
-      'plan' => $project->getProperty('plan')
+      'environments' => $subscription['environments'],
+      'storage' => $subscription['storage'],
+      'included users' => $subscription['included_users'],
     ];
     $render['properties'] = $this->dataStructToRenderableTable($properties);
+
     return $render;
   }
 
