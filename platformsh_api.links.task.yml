@@ -1,11 +1,10 @@
+# Redefine this default link so that the additional local task will show up.
 platformsh_api.settings:
   title: 'Platformsh API'
-  description: 'Configure the settings for platformsh api.'
   route_name: platformsh_api.settings
-  parent: system.admin_config_services
-# This doesn't work - added it as a local task instead.
+  base_route: platformsh_api.settings
 platformsh_api.testaccess:
   title: 'Test Platformsh API'
   description: 'Check connection for Platformsh api.'
   route_name: platformsh_api.testaccess
-  parent: platformsh_api.settings
+  base_route: platformsh_api.settings
