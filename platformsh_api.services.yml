@@ -1,0 +1,4 @@
+services:
+  platformsh_api.fetcher:
+    class: Drupal\platformsh_api\ApiService
+    arguments: ['@config.factory', '@http_client', '@settings']
