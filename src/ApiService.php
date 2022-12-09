@@ -3,9 +3,12 @@
 namespace Drupal\platformsh_api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\user\EntityOwnerInterface;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\PlatformClient;
 use Drupal\Core\Logger\LoggerChannelTrait;
@@ -205,6 +208,53 @@ class ApiService {
     $render['properties'] = $this->dataStructToRenderableTable($properties);
 
     return $render;
+  }
+
+  /**
+   * Utility lookup function. Does not belong here.
+   *
+   */
+  public static function getEntityById(string $id) {
+    $nodes = \Drupal::entityTypeManager()
+      ->getStorage('node')
+      ->loadByProperties([
+        'field_id' => $id,
+      ]);
+    if (count($nodes) > 1) {
+      throw new \InvalidArgumentException(t("More than one match for ID:%id found", ['id' => $id]));
+    }
+    return array_pop($nodes);
+  }
+  public static function createEntityById(string $id, $bundle) {
+
+    # With ref to EntityAutocomplete::validateEntityAutocomplete()
+    # Emulate what it's doing with a form submission until I figure out how to simplify things,
+
+    # The rules for autocreation are bound to the field widget
+    # So I have to retrieve that nd work from there.
+    $element = [
+      '#type' => 'entity_autocomplete',
+      '#selection_handler' => 'default',
+    ];
+    $handler_options = array (
+      'match_operator' => 'CONTAINS',
+      'match_limit' => 10,
+      'target_type' => 'user',
+      'handler' => 'default',
+    );
+    $input = [
+      'field_id' => $id,
+      'title' => $id,
+    ];
+    /** @var /Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
+    $handler = \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($handler_options);
+
+    $entity = $handler->createNewEntity(
+      'node',
+      $bundle,
+      $input,
+      \Drupal::currentUser()->id()
+    );
   }
 
 
