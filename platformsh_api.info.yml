@@ -1,5 +1,6 @@
 name: 'Platformsh API'
 type: module
 description: 'Interact with Platformsh API'
+package: Platform.sh
 core_version_requirement: '^8 || ^9'
 configure: platformsh_api.settings
