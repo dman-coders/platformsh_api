@@ -1,0 +1,56 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_plan
+field_name: field_plan
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: Development
+      label: Development
+    -
+      value: Small
+      label: Small
+    -
+      value: Standard
+      label: Standard
+    -
+      value: Medium
+      label: Medium
+    -
+      value: Large
+      label: Large
+    -
+      value: X-Large
+      label: X-Large
+    -
+      value: 2X-Large
+      label: 2X-Large
+    -
+      value: 'Grid X-Large'
+      label: 'Grid X-Large'
+    -
+      value: 4X-Large
+      label: 4X-Large
+    -
+      value: 'Grid 2X-Large'
+      label: 'Grid 2X-Large'
+    -
+      value: 'Grid 4X-Large'
+      label: 'Grid 4X-Large'
+    -
+      value: 'Grid 8X-Large'
+      label: 'Grid 8X-Large'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
