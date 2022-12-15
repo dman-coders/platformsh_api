@@ -4,6 +4,10 @@ dependencies:
   module:
     - node
     - options
+  enforced:
+    module:
+      - platformsh_api
+
 id: node.field_namespace
 field_name: field_namespace
 entity_type: node

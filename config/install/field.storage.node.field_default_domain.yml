@@ -3,6 +3,10 @@ status: true
 dependencies:
   module:
     - node
+  enforced:
+    module:
+      - platformsh_api
+
 id: node.field_default_domain
 field_name: field_default_domain
 entity_type: node
