@@ -2,6 +2,7 @@
 
 namespace Drupal\platformsh_api;
 
+use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -9,6 +10,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\user\EntityOwnerInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Platformsh\Client\Model\Project;
 use Platformsh\Client\PlatformClient;
 use Drupal\Core\Logger\LoggerChannelTrait;
@@ -27,9 +29,9 @@ class ApiService {
   /**
    * The settings.
    *
-   * @var \Drupal\Core\Config\Config
+   * @var Config
    */
-  protected $settings;
+  protected Config $settings;
 
   private PlatformClient $api_client;
 
@@ -46,6 +48,9 @@ class ApiService {
       return $this->api_client;
     }
     $api_key = $this->settings->get('api_key');
+    if (empty($api_key)) {
+      throw new \RuntimeException("No Platform.sh API key available. Please add a valid API key in the /admin/config/services/platformsh_api/ settings.");
+    }
     /** @var \Platformsh\Client\Model\Project $api_project */
     $this->api_client = new PlatformClient();
     $this->api_client->getConnector()->setApiToken($api_key, 'exchange');
@@ -61,9 +66,14 @@ class ApiService {
    *
    * @return array
    */
-  public function getAccountInfo($reset = false){
+  public function getAccountInfo(bool $reset = false): array {
     $this->getLogger('platformsh')->notice('Running API request getAccountInfo.');
-    return $this->getApiClient()->getAccountInfo($reset);
+    try {
+      return $this->getApiClient()->getAccountInfo($reset);
+    } catch (\Exception|GuzzleException $e) {
+      $this->getLogger('platformsh')->notice('Failed to retried Account Info: ' . $e->getMessage());
+      return [];
+    }
   }
 
   /**
@@ -72,12 +82,12 @@ class ApiService {
    * STUB to passthrough with extra logging.
    *
    * @param string $id
-   * @param string $hostname
-   * @param bool   $https
+   * @param string|null $hostname
+   * @param bool $https
    *
    * @return Project|false
    */
-  public function getProject($id, $hostname = null, $https = true) {
+  public function getProject(string $id, string $hostname = null, bool $https = true): Project|bool {
     $this->getLogger('platformsh')->notice('Running API request getProject.');
     $response = $this->getApiClient()->getProject($id, $hostname, $https);
     $this->getLogger('platformsh')->notice('Completed API request getProject.');
