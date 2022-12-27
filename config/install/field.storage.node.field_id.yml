@@ -12,7 +12,7 @@ field_name: field_id
 entity_type: node
 type: string
 settings:
-  max_length: 16
+  max_length: 36
   case_sensitive: false
   is_ascii: false
 module: core

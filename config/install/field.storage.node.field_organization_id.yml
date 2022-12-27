@@ -7,8 +7,8 @@ dependencies:
     module:
       - platformsh_api
 
-id: node.field_organization
-field_name: field_organization
+id: node.field_organization_id
+field_name: field_organization_id
 entity_type: node
 type: entity_reference
 settings:
