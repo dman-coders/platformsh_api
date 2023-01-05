@@ -2,14 +2,11 @@
 
 namespace Drupal\Tests\platformsh_api\Functional;
 
-use Drupal\feeds\FeedInterface;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\feeds\Traits\FeedCreationTrait;
-use Drupal\Tests\feeds\Traits\FeedsCommonTrait;
-use Drupal\Tests\Traits\Core\CronRunTrait;
+use Drupal\user\UserInterface;
 
 /**
- * Provides a base class for Feeds functional tests.
+ * Provides a base class for functional tests.
  */
 abstract class PlatformshBrowserTestBase extends BrowserTestBase {
 
@@ -32,18 +29,18 @@ abstract class PlatformshBrowserTestBase extends BrowserTestBase {
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $adminUser;
+  protected UserInterface $adminUser;
 
   /**
    * {@inheritdoc}
    */
-  protected function _setUp(): void {
+  protected function setUp(): void {
     parent::setUp();
 
-    // Create an user with Feeds admin privileges.
+    // Create a user with admin privileges.
     $this->adminUser = $this->drupalCreateUser([
-      'administer feeds',
-      'access feed overview',
+      'administer platformsh_api',
+      'create project',
     ]);
     $this->drupalLogin($this->adminUser);
   }

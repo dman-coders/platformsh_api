@@ -12,3 +12,10 @@ The test actions are heavily logged, so clues may be seen in the recent log mess
 
 The `platformsh_api` library is used mostly as a conduit for other modules.
 
+##
+Development testing
+
+To run tests:
+
+```
+php web/core/scripts/run-tests.sh --sqlite --module platformsh_api```

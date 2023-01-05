@@ -2,18 +2,44 @@
 
 namespace Drupal\platformsh_api\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\platformsh_api\ApiService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * TODO: class docs.
+ * Admin form for Platform.sh API settings
  */
 class AdminSettingsForm extends ConfigFormBase {
+
+  private ApiService $api_service;
+
+  /**
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\platformsh_api\ApiService $api_service
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, ApiService $api_service) {
+    parent::__construct($config_factory);
+    $this->api_service = $api_service;
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public static function create(ContainerInterface $container) {
+    // Dependency injection requires that we mirror and extend ConfigFormBase.
+    return new static(
+      // Load the services required to construct this class.
+      $container->get('config.factory'),
+      $container->get('platformsh_api.fetcher')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
     return 'platformsh_api_settings_form';
   }
 
@@ -21,12 +47,10 @@ class AdminSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('platformsh_api.settings');
-
     $form['api_key'] = [
       '#type' => "textfield",
       '#title' => $this->t("Api Key"),
-      '#default_value' => $config->get('api_key'),
+      '#default_value' => $this->api_service->getApiKey(),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -56,7 +80,7 @@ class AdminSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return ['platformsh_api.settings'];
   }
 

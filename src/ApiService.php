@@ -36,6 +36,27 @@ class ApiService {
   private PlatformClient $api_client;
 
   /**
+   * Fetch the appropriate API key
+   * either from the settings or the environment variables.
+   * Drupal settings takes priority over environment variables.
+   *
+   * @return string
+   */
+  public function getApiKey() {
+    $api_key = $this->settings->get('api_key');
+    if (!empty($api_key)) {
+      return $api_key;
+    }
+    $api_key = getenv('PLATFORMSH_API_TOKEN');
+    if (empty($api_key)) {
+      $url = Url::fromRoute('platformsh_api.settings');
+      $settings_link = Link::fromTextAndUrl('Platformsh API settings', $url)->toString();
+      throw new \RuntimeException("No Platform.sh API key available. Please add a valid API key in the $settings_link or set PLATFORMSH_API_TOKEN as an environment variable.");
+    }
+    return $api_key;
+  }
+
+  /**
    * Return a working API client.
    *
    * Initializing api_client in the constructor didn't seem to persist,
@@ -47,10 +68,8 @@ class ApiService {
     if (!empty($this->api_client)) {
       return $this->api_client;
     }
-    $api_key = $this->settings->get('api_key');
-    if (empty($api_key)) {
-      throw new \RuntimeException("No Platform.sh API key available. Please add a valid API key in the /admin/config/services/platformsh_api/ settings.");
-    }
+    $api_key = $this->getApiKey();
+
     /** @var \Platformsh\Client\Model\Project $api_project */
     $this->api_client = new PlatformClient();
     $this->api_client->getConnector()->setApiToken($api_key, 'exchange');
@@ -101,7 +120,6 @@ class ApiService {
    *   The config factory.
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
-    #$this->settings = \Drupal::config('platformsh_api.settings');
     $this->settings = $config_factory->get('platformsh_api.settings');
   }
 
@@ -234,37 +252,6 @@ class ApiService {
       throw new \InvalidArgumentException(t("More than one match for ID:%id found", ['id' => $id]));
     }
     return array_pop($nodes);
-  }
-  public static function createEntityById(string $id, $bundle) {
-
-    # With ref to EntityAutocomplete::validateEntityAutocomplete()
-    # Emulate what it's doing with a form submission until I figure out how to simplify things,
-
-    # The rules for autocreation are bound to the field widget
-    # So I have to retrieve that nd work from there.
-    $element = [
-      '#type' => 'entity_autocomplete',
-      '#selection_handler' => 'default',
-    ];
-    $handler_options = array (
-      'match_operator' => 'CONTAINS',
-      'match_limit' => 10,
-      'target_type' => 'user',
-      'handler' => 'default',
-    );
-    $input = [
-      'field_id' => $id,
-      'title' => $id,
-    ];
-    /** @var /Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
-    $handler = \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($handler_options);
-
-    $entity = $handler->createNewEntity(
-      'node',
-      $bundle,
-      $input,
-      \Drupal::currentUser()->id()
-    );
   }
 
 
