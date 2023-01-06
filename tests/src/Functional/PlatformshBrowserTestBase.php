@@ -42,7 +42,6 @@ abstract class PlatformshBrowserTestBase extends BrowserTestBase {
     // Create a user with admin privileges.
     $this->adminUser = $this->drupalCreateUser([
       'administer platformsh_api',
-      'create project',
     ]);
     $this->drupalLogin($this->adminUser);
   }

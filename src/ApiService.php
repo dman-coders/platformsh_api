@@ -51,7 +51,9 @@ class ApiService {
     if (empty($api_key)) {
       $url = Url::fromRoute('platformsh_api.settings');
       $settings_link = Link::fromTextAndUrl('Platformsh API settings', $url)->toString();
-      throw new \RuntimeException("No Platform.sh API key available. Please add a valid API key in the $settings_link or set PLATFORMSH_API_TOKEN as an environment variable.");
+      \Drupal::messenger()->addWarning("No Platform.sh API key available. Please add a valid API key in the $settings_link or set PLATFORMSH_API_TOKEN as an environment variable.");
+
+      #throw new \RuntimeException("No Platform.sh API key available. Please add a valid API key in the $settings_link or set PLATFORMSH_API_TOKEN as an environment variable.");
     }
     return $api_key;
   }

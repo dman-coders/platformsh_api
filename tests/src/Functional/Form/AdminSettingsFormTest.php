@@ -12,7 +12,7 @@ use Drupal\Tests\platformsh_api\Functional\PlatformshBrowserTestBase;
  */
 class AdminSettingsFormTest extends PlatformshBrowserTestBase {
 
-  public function testIfTestingRuns() {
+  private function testIfTestingRuns() {
     $this->assertEquals('foo', 'foo');
     $this->assertEquals('bar', 'bar');
   }
@@ -20,14 +20,14 @@ class AdminSettingsFormTest extends PlatformshBrowserTestBase {
   /**
    * Tests setting the API key via UI.
    */
-  private function _testAdminSettingsFormSavesConfiguration() {
+  public function testAdminSettingsFormSavesConfiguration() {
 
     // Go to the admin form.
     $this->drupalGet('/admin/config/services/platformsh_api');
 
     // Set value.
     $edit = [
-      'source[api_key]' => 'foo',
+      'api_key' => 'foo',
     ];
     $this->submitForm($edit, 'Save');
 
