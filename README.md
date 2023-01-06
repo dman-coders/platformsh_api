@@ -18,4 +18,6 @@ Development testing
 To run tests:
 
 ```
-php web/core/scripts/run-tests.sh --sqlite --module platformsh_api```
+php web/core/scripts/run-tests.sh --sqlite --module platformsh_api
+
+```

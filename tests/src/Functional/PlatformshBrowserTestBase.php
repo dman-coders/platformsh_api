@@ -35,6 +35,8 @@ abstract class PlatformshBrowserTestBase extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    // Normal testing setup starts off with install profile = 'testing';
+    // This is sparse.
     parent::setUp();
 
     // Create a user with admin privileges.
