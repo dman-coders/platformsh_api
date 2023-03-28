@@ -45,8 +45,8 @@ class Project extends ApiResource {
   /**
    * There is something unexpected in the return data for a Project.
    *
-   * If the owner_info:type = organisation
-   * then the owner ID refers to an organisation ID, not a user.
+   * If the owner_info:type = organization
+   * then the owner ID refers to an organization ID, not a user.
    * Which means the 'owner' is ...
    * https://api.platform.sh/docs/#tag/Project/operation/get-projects
    * OK, `owner` is now deprecated (but still works sometimes)
@@ -67,7 +67,7 @@ class Project extends ApiResource {
    *
    * @return mixed
    */
-  protected function alterData($raw_data) {
+  protected function alterData($raw_data): mixed {
     if (isset($raw_data['owner_info'])) {
       if ($raw_data['owner_info']['type'] == 'organization') {
         // This slightly changes our schema def.

@@ -17,7 +17,7 @@ class User extends ApiResource {
 
   // Custom behavior here.
 
-  protected array $field_keys = ['country'];
+  protected array $field_keys = ['country', 'first_name', 'last_name'];
 
   protected array $reference_keys = [];
 

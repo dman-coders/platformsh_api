@@ -54,20 +54,41 @@ abstract class ApiResource extends Node {
 
 
   /**
+   * Fetch the actual data using the PHP API.
+   *
+   * This is expected to be overridden by the subclass to match the
+   * \Platformsh\Client methods.
+   *
    * @return ApiResourceBase|false
    * @see \Platformsh\Client\Model\ApiResourceBase::get()
    */
   abstract public function getResource($remoteEntityID): bool|ApiResourceBase;
 
+  /**
+   * Add logic specific to the content types.
+   *
+   * This is expected to be overridden by the subclass if extra
+   * if/then logic is needed.
+   *
+   * @param $raw_data
+   *
+   * @return mixed
+   */
+  protected function alterData($raw_data) {
+    return $raw_data;
+  }
+
+  /**
+   * Utility
+   *
+   * @return \Platformsh\Client\PlatformClient
+   */
   protected function getApiClient() {
     $this->api_service = \Drupal::service('platformsh_api.fetcher');
     $this->api_client = $this->api_service->getApiClient();
     return $this->api_client;
   }
 
-  protected function alterData($raw_data) {
-    return $raw_data;
-  }
 
   /**
    * Generic resource fetcher.
@@ -106,9 +127,12 @@ abstract class ApiResource extends Node {
     $viable_fields = $this->getFields();
     $raw_dump = $resource->getData();
     // Recording whether a change actually happened is tedious,
-    // but it will keep history much cleaner. Keep a detailed changelog in $updated.
+    // but it will keep history much cleaner
+    // as we can skip making updates with no changes.
+    // Keep a detailed changelog in $updated.
     $updated = [];
-    // Excise the links for brevity
+
+    // Excise the links for brevity, and log the diagnostics.
     unset($raw_dump['_links']);
     $json_dump = json_encode($raw_dump, JSON_PRETTY_PRINT);
     $this->messenger()->addStatus($json_dump);
@@ -125,7 +149,7 @@ abstract class ApiResource extends Node {
       $this->messenger()->addError(print_r($resource->getPropertyNames(), 1));
     }
 
-    // Store the raw data for review
+    // Store the raw data for review.
     if (in_array('field_data', array_keys($viable_fields))) {
       if ($this->get('field_data') != $json_dump) {
         $this->set('field_data', $json_dump);
@@ -138,15 +162,16 @@ abstract class ApiResource extends Node {
 
     // Now set the values we extracted
     foreach ($this->field_keys as $key_name) {
+      $field_name = 'field_' . $key_name;
       if (
         isset($raw_dump[$key_name])
         &&
-        in_array('field_' . $key_name, array_keys($viable_fields))
+        in_array($field_name, array_keys($viable_fields))
         &&
-        ($this->get('field_' . $key_name) != $resource->getData()[$key_name])
+        ($this->get($field_name) != $resource->getData()[$key_name])
       ) {
-        $this->set('field_' . $key_name, $resource->getData()[$key_name]);
-        $updated['field_' . $key_name] = true;
+        $this->set($field_name, $resource->getData()[$key_name]);
+        $updated[$field_name] = true;
       }
       else {
         # field miss-match. Either our the expected data did not come back,
@@ -159,7 +184,7 @@ abstract class ApiResource extends Node {
 
     #$node->set('field_' . 'updated_at' , $response->getData()['updated_at']);
 
-    // Take care, as this action may be called on hook_entity_presave, avoid a loop.
+    // Take care, as this action may be called on hook_entity_presave. Avoid a loop.
     if (!empty($updated) && !$this->isNew()) {
       try {
         $this->save();
@@ -187,6 +212,7 @@ abstract class ApiResource extends Node {
    * @param array $raw_data
    *
    * @return array A list of what, if anything, was updated.
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   function autocreateTargetEntities(array $raw_data): array {
     $updated = [];
@@ -194,9 +220,8 @@ abstract class ApiResource extends Node {
     foreach ($this->reference_keys as $key_type => $key_name) {
       /** @var \Drupal\Core\Field\FieldItemListInterface $value */
       $target_guid = $raw_data[$key_name];
-      if (empty($target_guid)) {
-        continue;
-      }
+      if (empty($target_guid)) { continue;  }
+
       // Fetch or create the target first
       $target = $this->api_service::getEntityById($target_guid);
 
@@ -216,7 +241,7 @@ abstract class ApiResource extends Node {
         $target_info = ['target_id' => $target->id()];
         if ($this->get('field_' . $key_name) != $target->id()) {
           $updated['field_' . $key_name] = true;
-          // check this logic
+          // TODO: check this logic
         }
         $this->set('field_' . $key_name, $target_info);
       }
