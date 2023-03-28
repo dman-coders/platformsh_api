@@ -1,22 +1,2 @@
 <?php
 
-
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-
-
-use Drupal\platformsh_api\Entity\Organization;
-
-function platformsh_api_entity_bundle_info_alter(array &$bundles): void {
-  if (isset($bundles['node']['project'])) {
-    // Possible since 9.3 https://www.drupal.org/project/drupal/issues/2570593
-    $bundles['node']['project']['class'] = \Drupal\platformsh_api\Entity\Project::class;
-  }
-  if (isset($bundles['node']['user'])) {
-    $bundles['node']['user']['class'] = \Drupal\platformsh_api\Entity\User::class;
-  }
-  if (isset($bundles['node']['organization'])) {
-    $bundles['node']['organization']['class'] = \Drupal\platformsh_api\Entity\Organization::class;
-  }
-}
-

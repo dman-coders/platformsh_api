@@ -4,7 +4,7 @@ namespace Drupal\Tests\platformsh_api\Functional;
 
 use Drupal;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\platformsh_api\ApiService;
+use Drupal\platformsh_project\ApiService;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\UserInterface;
 
@@ -30,7 +30,7 @@ abstract class PlatformshBrowserTestBase extends BrowserTestBase {
   /**
    * Will use this sometimes
    *
-   * @var \Drupal\platformsh_api\ApiService
+   * @var \Drupal\platformsh_project\ApiService
    */
   protected $api_service;
 

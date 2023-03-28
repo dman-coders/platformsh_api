@@ -4,7 +4,7 @@ namespace Drupal\platformsh_api\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\platformsh_api\ApiService;
+use Drupal\platformsh_project\ApiService;
 use GuzzleHttp\Exception\GuzzleException;
 use Platformsh\Client\PlatformClient;
 

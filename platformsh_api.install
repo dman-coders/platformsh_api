@@ -5,43 +5,11 @@
  * Install, update and uninstall functions for the platformsh_project module.
  */
 
-/**
- * Implements hook_install().
- */
-function platformsh_api_install(): void {
-  \Drupal::messenger()->addStatus(__FUNCTION__ . " is installing content definitions from its yaml configs");
-  // The creation of all content types and fields is managed by config/install.
-  // Crating content types programatically here is tedious,
-  // Yaml definitions are fine, as long as we keep the dependencies aligned
-}
-
-/**
- * Implements hook_uninstall().
- *
- * Delete all nodes of content types defined by this module,
- * the content type definitions,
- * and their field storage definitions.
- */
-function platformsh_api_uninstall(): void {
-  \Drupal::messenger()->addStatus(__FUNCTION__ . " is deleting all content associated with its content types.");
-
-  $content_type_names = ['organization','user'];
-  foreach ($content_type_names as $content_type_name) {
-    $storage_handler = \Drupal::entityTypeManager()
-      ->getStorage('node');
-    $nodes = $storage_handler->loadByProperties(['type' => $content_type_name]);
-    $storage_handler->delete($nodes);
-  }
-  // To ensure that our content type definitions and field definitions
-  // associated with this module go away also, add
-  // `dependencies:enforced:module:platformsh_api`
-  // To every `field.storage.node.*.yml` file in `config/install`
-  // Otherwise they will remain behind as orphaned fields,
-  // and conflict if you try to re-install this module.
-}
 
 /**
  * Implements hook_requirements().
+ *
+ * Should verify the library version and if the connection is authenticated.
  */
 function platformsh_api_requirements($phase): array {
   $requirements = [];

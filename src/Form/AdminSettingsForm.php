@@ -5,7 +5,7 @@ namespace Drupal\platformsh_api\Form;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\platformsh_api\ApiService;
+use Drupal\platformsh_project\ApiService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,7 +17,7 @@ class AdminSettingsForm extends ConfigFormBase {
 
   /**
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   * @param \Drupal\platformsh_api\ApiService $api_service
+   * @param \Drupal\platformsh_project\ApiService $api_service
    */
   public function __construct(ConfigFactoryInterface $config_factory, ApiService $api_service) {
     parent::__construct($config_factory);
