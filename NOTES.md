@@ -25,3 +25,12 @@ Instead, I have to do it slightly manually.
 * Launch that from the cli, with `xdg-open`
   * `xdg:open "postman://app/oauth2/callback?code=..." `
 * This should switch back to the `postman` app with a prefilled token. "Use Token" for this session.
+
+---
+
+# Using `platform` to work with the API
+
+```
+platform api:curl users/me
+```
+
