@@ -1,5 +1,9 @@
 # Platform.sh API
 
+A wrapper and an authentication key manager for `Platform.sh API client`.
+
+  2023-04 tested against  : platformsh/client:2.5.1 (before "Organisations" was introduced) 2.6+ was still in beta, no stable.
+
 ## Configuration
 
 Add your API key at `/admin/config/services/platformsh_api`
