@@ -12,6 +12,12 @@
     "require": {
         "platformsh/client": "^2.5"
     },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+        }
+    },
+
     "extra": {
         "patches": {
             "platformsh/client": {
