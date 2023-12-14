@@ -14,7 +14,7 @@
     },
     "config": {
         "allow-plugins": {
-            "cweagans/composer-patches": true,
+            "cweagans/composer-patches": true
         }
     },
 
