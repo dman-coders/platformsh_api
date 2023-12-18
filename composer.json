@@ -21,7 +21,7 @@
     "extra": {
         "patches": {
             "platformsh/client": {
-                "PHP 8 function signature strictness": "patches/ApiResourceBase-signature-mismatch.patch"
+                "PHP 8 function signature strictness": "./patches/ApiResourceBase-signature-mismatch.patch"
             }
         },
         "enable-patching": true
