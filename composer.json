@@ -9,8 +9,10 @@
             "name": "Dan Morrison"
         }
     ],
+    "minimum-stability": "beta",
+    "prefer-stable": true,
     "require": {
-        "platformsh/client": "^2.5"
+        "platformsh/client": "^3@beta"
     },
     "config": {
         "allow-plugins": {
